@@ -27,6 +27,14 @@ app.use('/api/student', require('./routes/userRoutes')); // ✅ Student dashboar
 // Health check
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
+//  Serve Frontend (IMPORTANT FOR RENDER)
+const __dirnameResolved = path.resolve();
+app.use(express.static(path.join(__dirnameResolved, 'client/dist')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirnameResolved, 'client/dist', 'index.html'));
+});
+
 // Error handler (last)
 app.use(errorHandler);
 
