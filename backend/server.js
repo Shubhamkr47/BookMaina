@@ -16,28 +16,19 @@ connectDB().catch((err) => {
   process.exit(1);
 });
 
-// Routes
+// API Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/books', require('./routes/bookRoutes'));
 app.use('/api/issue', require('./routes/issueRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
-app.use('/api/users', require('./routes/userRoutes')); // Admin/user management
-app.use('/api/student', require('./routes/userRoutes')); // ✅ Student dashboard (stats)
+app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/student', require('./routes/userRoutes'));
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
-//  Serve Frontend (IMPORTANT FOR RENDER)
-const __dirnameResolved = path.resolve();
-app.use(express.static(path.join(__dirnameResolved, 'client/dist')));
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirnameResolved, 'client/dist', 'index.html'));
-});
-
-// Error handler (last)
+// Error handler
 app.use(errorHandler);
 
-// Start server
 const port = process.env.PORT || 8000;
 app.listen(port, () => console.log(`🚀 Server running on port ${port}`));
