@@ -13,8 +13,8 @@ import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import PeopleIcon from '@mui/icons-material/People';
 import AssignmentReturnIcon from '@mui/icons-material/AssignmentReturn';
 import { useNavigate } from 'react-router-dom';
+import api from '../../services/api';
 
-// Reusable StatCard component
 const StatCard = ({ icon, label, value }) => (
   <Card sx={{ bgcolor: '#f5f5f5', boxShadow: 3 }}>
     <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -35,29 +35,16 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const token = localStorage.getItem('token');
-        if (!token) {
+        if (!localStorage.getItem('token')) {
           setError('You are not logged in.');
           return;
         }
 
-        const response = await fetch('http://localhost:8000/api/admin/stats', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || data.error || 'Failed to fetch dashboard stats');
-        }
-
+        const { data } = await api.get('/admin/stats');
         setStats(data);
       } catch (err) {
-        console.error('❌ Error loading stats:', err.message);
-        setError(err.message || 'Unable to load dashboard statistics.');
+        console.error('Error loading stats:', err.message);
+        setError(err.response?.data?.message || err.response?.data?.error || err.message || 'Unable to load dashboard statistics.');
       }
     };
 
@@ -81,7 +68,6 @@ const AdminDashboard = () => {
     <Box sx={{ p: 4 }}>
       <Typography variant="h4" gutterBottom color="primary">Admin Dashboard</Typography>
 
-      {/* Stat Cards Section */}
       <Grid container spacing={3}>
         <Grid item xs={12} sm={4}>
           <StatCard
@@ -106,10 +92,9 @@ const AdminDashboard = () => {
         </Grid>
       </Grid>
 
-      {/* Admin Tools Section */}
       <Box sx={{ mt: 6, textAlign: 'center' }}>
         <Typography variant="h6" gutterBottom>
-          📁 Admin Tools
+          Admin Tools
         </Typography>
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
           <Button
@@ -117,43 +102,43 @@ const AdminDashboard = () => {
             color="primary"
             onClick={() => navigate('/admin/add-book')}
           >
-            ➕ Add Book
+            Add Book
           </Button>
           <Button
             variant="contained"
             color="primary"
             onClick={() => navigate('/admin/view-books')}
           >
-            📚 View Books
+            View Books
           </Button>
           <Button
             variant="contained"
             color="primary"
             onClick={() => navigate('/admin/issue-return')}
           >
-            🔄 Issue/Return
+            Issue/Return
           </Button>
         </Box>
       </Box>
 
-      {/* Analytics Section */}
-      <Box sx={{
-        mt: 6,
-        textAlign: 'center',
-        bgcolor: '#f5f5f5',
-        py: 4,
-        px: 2,
-        borderRadius: 2
-      }}>
+      <Box
+        sx={{
+          mt: 6,
+          textAlign: 'center',
+          bgcolor: '#f5f5f5',
+          py: 4,
+          px: 2,
+          borderRadius: 2
+        }}
+      >
         <Typography variant="h6" gutterBottom>
-          📊 Analytics Coming Soon
+          Analytics Coming Soon
         </Typography>
         <Typography variant="body2" color="text.secondary">
           Charts for most borrowed books and defaulters will be shown here.
         </Typography>
       </Box>
     </Box>
-    
   );
 };
 

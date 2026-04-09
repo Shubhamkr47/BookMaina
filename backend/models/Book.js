@@ -5,7 +5,9 @@ const bookSchema = new mongoose.Schema({
   author: { type: String, required: true },
   isbn: { type: String, required: true, unique: true },
   category: { type: String },
-  availability: { type: String, enum: ['available', 'issued'], default: 'available' }
+  year: { type: Number },
+  availability: { type: String, enum: ['available', 'issued'], default: 'available' },
+  availableCopies: { type: Number, default: 1 },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Book', bookSchema);

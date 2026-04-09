@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import LibraryBackground from '../../components/LibraryBackground';
+import api from '../../services/api';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -24,25 +25,11 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // ✅ Fixed API endpoint to match backend
-      const response = await fetch('http://localhost:8000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
+      const { data } = await api.post('/auth/login', { email, password });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        // ✅ Check both message and error fields
-        throw new Error(data.message || data.error || 'Login failed');
-      }
-
-      // ✅ Save token & user info
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
 
-      // ✅ Role-based navigation
       if (data.user.role === 'admin') {
         navigate('/admin/dashboard');
       } else if (data.user.role === 'student') {
@@ -50,9 +37,8 @@ const Login = () => {
       } else {
         throw new Error('Unknown user role');
       }
-
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.message || err.response?.data?.error || err.message);
     } finally {
       setLoading(false);
     }
@@ -83,7 +69,7 @@ const Login = () => {
           }}
         >
           <Typography variant="h5" gutterBottom align="center">
-            🔐 BookMania Login
+            BookMania Login
           </Typography>
 
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -118,14 +104,13 @@ const Login = () => {
             </Button>
           </form>
 
-          {/* Register button */}
           <Button
             variant="text"
             fullWidth
             sx={{ mt: 2 }}
             onClick={() => navigate('/register')}
           >
-            Don't have an account? Register
+            Don&apos;t have an account? Register
           </Button>
         </Paper>
       </Box>

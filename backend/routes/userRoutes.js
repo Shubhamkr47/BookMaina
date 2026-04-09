@@ -3,17 +3,16 @@ const router = express.Router();
 const userController = require('../controllers/userController');
 const auth = require('../middlewares/Auth');
 const adminOnly = require('../middlewares/adminOnly');
-const Issue = require('../models/Issue'); // ✅ Make sure this matches your file name exactly
+const Issue = require('../models/Issue');
 
-// ✅ Student dashboard stats route must come before `/:id`
 router.get('/stats', auth, async (req, res) => {
   try {
     const booksBorrowed = await Issue.countDocuments({
-      userId: req.user.id
+      user: req.user.id
     });
 
     const booksReturned = await Issue.countDocuments({
-      userId: req.user.id,
+      user: req.user.id,
       returned: true
     });
 
@@ -24,7 +23,6 @@ router.get('/stats', auth, async (req, res) => {
   }
 });
 
-// Admin manage users; users may view/update themselves
 router.post('/', auth, adminOnly, userController.createValidators, userController.createUser);
 router.get('/', auth, adminOnly, userController.getUsers);
 router.get('/:id', auth, userController.getUserById);

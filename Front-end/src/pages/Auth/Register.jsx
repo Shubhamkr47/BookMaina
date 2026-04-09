@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, TextField, Typography, Paper, Alert } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import api from '../../services/api';
 
 const Register = () => {
   const [form, setForm] = useState({ name: '', email: '', password: '', role: '' });
@@ -8,7 +9,7 @@ const Register = () => {
   const [success, setSuccess] = useState(null);
   const navigate = useNavigate();
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -18,23 +19,15 @@ const Register = () => {
     setSuccess(null);
 
     try {
-      const response = await fetch('http://localhost:8000/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
+      await api.post('/auth/register', {
+        ...form,
+        role: form.role || 'student',
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
-      }
-
       setSuccess('Registration successful! Redirecting to login...');
-      setTimeout(() => navigate('/login'), 1500); // redirect after short delay
-
+      setTimeout(() => navigate('/login'), 1500);
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.message || err.response?.data?.error || err.message);
     }
   };
 
@@ -83,7 +76,6 @@ const Register = () => {
             margin="normal"
             value={form.role}
             onChange={handleChange}
-            required
           />
           <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
             Register

@@ -10,7 +10,8 @@ import {
   Container,
 } from "@mui/material";
 import Lottie from "lottie-react";
-import readingAnimation from "../../assets/reading.json"; // Make sure path is correct
+import readingAnimation from "../../assets/reading.json";
+import api from "../../services/api";
 
 const StudentDashboard = () => {
   const [stats, setStats] = useState(null);
@@ -23,23 +24,13 @@ const StudentDashboard = () => {
 
     const fetchStats = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) throw new Error("Not logged in");
+        if (!localStorage.getItem("token")) throw new Error("Not logged in");
 
-        const res = await fetch("http://localhost:8000/api/student/stats", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Failed to load stats");
-
+        const { data } = await api.get("/student/stats");
         setStats(data);
       } catch (err) {
         console.error(err);
-        setError(err.message || "Unable to fetch dashboard data.");
+        setError(err.response?.data?.message || err.response?.data?.error || err.message || "Unable to fetch dashboard data.");
       }
     };
 

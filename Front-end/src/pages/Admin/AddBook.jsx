@@ -1,46 +1,35 @@
 import React, { useState } from 'react';
 import {
-  Box, TextField, Button, Typography, Paper, Input
+  Box, TextField, Button, Typography, Paper
 } from '@mui/material';
-import axios from 'axios';
+import api from '../../services/api';
 
 const AddBook = () => {
   const [book, setBook] = useState({
     title: '',
     author: '',
     isbn: '',
-    quantity: '',
+    category: '',
+    year: '',
+    availability: 'available',
   });
-  const [image, setImage] = useState(null);
 
   const handleChange = (e) => {
     setBook({ ...book, [e.target.name]: e.target.value });
   };
 
-  const handleImageChange = (e) => {
-    setImage(e.target.files[0]);
-  };
-
   const handleSubmit = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const formData = new FormData();
-      Object.keys(book).forEach((key) => formData.append(key, book[key]));
-      if (image) formData.append('image', image);
-
-      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/books`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
+      await api.post('/books', {
+        ...book,
+        year: book.year ? Number(book.year) : undefined,
       });
 
       alert('Book added!');
-      setBook({ title: '', author: '', isbn: '', quantity: '' });
-      setImage(null);
+      setBook({ title: '', author: '', isbn: '', category: '', year: '', availability: 'available' });
     } catch (err) {
       console.error(err);
-      alert('Failed to add book');
+      alert(err.response?.data?.message || err.response?.data?.error || 'Failed to add book');
     }
   };
 
@@ -52,8 +41,9 @@ const AddBook = () => {
         <TextField label="Title" name="title" value={book.title} onChange={handleChange} fullWidth margin="normal" />
         <TextField label="Author" name="author" value={book.author} onChange={handleChange} fullWidth margin="normal" />
         <TextField label="ISBN" name="isbn" value={book.isbn} onChange={handleChange} fullWidth margin="normal" />
-        <TextField label="Quantity" name="quantity" value={book.quantity} onChange={handleChange} fullWidth margin="normal" />
-        <Input type="file" onChange={handleImageChange} fullWidth sx={{ mt: 2 }} />
+        <TextField label="Category" name="category" value={book.category} onChange={handleChange} fullWidth margin="normal" />
+        <TextField label="Year" name="year" value={book.year} onChange={handleChange} fullWidth margin="normal" />
+        <TextField label="Availability" name="availability" value={book.availability} onChange={handleChange} fullWidth margin="normal" />
 
         <Button variant="contained" color="primary" fullWidth onClick={handleSubmit} sx={{ mt: 2 }}>
           Add Book

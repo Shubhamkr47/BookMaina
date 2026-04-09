@@ -1,8 +1,4 @@
 import React, { useState } from 'react';
-import QRScanner from '../../components/QRScanner';
-
-<QRScanner onScanSuccess={(data) => setFormData({ ...formData, bookId: data })} />
-
 import {
   Box,
   Paper,
@@ -11,7 +7,8 @@ import {
   Button,
   MenuItem,
 } from '@mui/material';
-import axios from 'axios';
+import QRScanner from '../../components/QRScanner';
+import api from '../../services/api';
 
 const IssueReturn = () => {
   const [formData, setFormData] = useState({
@@ -29,33 +26,19 @@ const IssueReturn = () => {
 
   const handleSubmit = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const endpoint = formData.action === 'issue' ? '/issue/issue' : '/issue/return';
 
-      const endpoint =
-        formData.action === 'issue'
-          ? '/issue-book'
-          : '/return-book';
-
-      await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}${endpoint}`,
-        {
-          studentEmail: formData.studentEmail,
-          bookId: formData.bookId,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await api.post(endpoint, {
+        studentEmail: formData.studentEmail,
+        bookId: formData.bookId,
+      });
 
       alert(`Book ${formData.action === 'issue' ? 'issued' : 'returned'} successfully!`);
       setFormData({ studentEmail: '', bookId: '', action: 'issue' });
     } catch (err) {
-      alert('Operation failed.');
+      alert(err.response?.data?.message || err.response?.data?.error || 'Operation failed.');
     }
   };
-  
 
   return (
     <Box sx={{ p: 4 }}>
@@ -80,6 +63,8 @@ const IssueReturn = () => {
           fullWidth
           margin="normal"
         />
+
+        <QRScanner onScanSuccess={(data) => setFormData((prev) => ({ ...prev, bookId: data }))} />
 
         <TextField
           select

@@ -16,6 +16,7 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { useNavigate } from 'react-router-dom';
+import api from '../../services/api';
 
 const ViewBooks = () => {
   const [books, setBooks] = useState([]);
@@ -23,58 +24,29 @@ const ViewBooks = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // ✅ Fetch all books
   const fetchBooks = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:8000/api/admin/books', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || data.error || 'Failed to load books');
-      }
-
+      const { data } = await api.get('/books');
       setBooks(data);
     } catch (err) {
       console.error(err);
-      setError(err.message);
+      setError(err.response?.data?.message || err.response?.data?.error || err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ Delete a book
   const handleDelete = async (bookId) => {
     if (!window.confirm('Are you sure you want to delete this book?')) return;
 
-    const token = localStorage.getItem('token');
     const oldBooks = [...books];
-
-    // Optimistic UI update
-    setBooks(books.filter(book => book._id !== bookId));
+    setBooks(books.filter((book) => book._id !== bookId));
 
     try {
-      const res = await fetch(`http://localhost:8000/api/admin/books/${bookId}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-      });
-
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.message || 'Failed to delete book');
-      }
+      await api.delete(`/books/${bookId}`);
     } catch (err) {
-      alert(err.message);
-      setBooks(oldBooks); // rollback if failed
+      alert(err.response?.data?.message || err.response?.data?.error || err.message);
+      setBooks(oldBooks);
     }
   };
 
@@ -95,7 +67,7 @@ const ViewBooks = () => {
 
   return (
     <Box sx={{ p: 4 }}>
-      <Typography variant="h4" gutterBottom>📚 All Books</Typography>
+      <Typography variant="h4" gutterBottom>All Books</Typography>
 
       <TableContainer component={Paper}>
         <Table>
@@ -111,7 +83,7 @@ const ViewBooks = () => {
             {books.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} align="center">
-                  No books available 📭
+                  No books available
                 </TableCell>
               </TableRow>
             ) : (
