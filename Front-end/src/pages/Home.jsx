@@ -1,40 +1,104 @@
 import React from 'react';
-import { Box, Typography, Button, Container } from '@mui/material';
+import { Box, Typography, Button, Container, Stack, Paper } from '@mui/material';
 import Lottie from 'lottie-react';
-import homeAnimation from '../assets/home.json'; // Your hero animation
+import homeAnimation from '../assets/Home.json';
 import { useNavigate } from 'react-router-dom';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
+import AutoStoriesOutlinedIcon from '@mui/icons-material/AutoStoriesOutlined';
+import QrCodeScannerOutlinedIcon from '@mui/icons-material/QrCodeScannerOutlined';
+import InsightsOutlinedIcon from '@mui/icons-material/InsightsOutlined';
+import LibraryBackground from '../components/LibraryBackground';
+
+const features = [
+  { icon: <AutoStoriesOutlinedIcon color="primary" />, title: 'Smart Catalog', text: 'Track books, categories, and availability in one clean workspace.' },
+  { icon: <QrCodeScannerOutlinedIcon color="primary" />, title: 'QR Workflows', text: 'Issue and return books faster with lightweight QR-based actions.' },
+  { icon: <InsightsOutlinedIcon color="primary" />, title: 'Useful Dashboards', text: 'Give admins and students the exact stats they need at a glance.' },
+];
 
 const Home = () => {
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
-return (
-    <Box sx={{ bgcolor: '#f9f9f9', minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
-    <Container maxWidth="lg" sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: 'center', justifyContent: 'space-between', py: 6 }}>
-        
-        {/* Text Section */}
-        <Box sx={{ flex: 1, textAlign: { xs: 'center', md: 'left' } }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'center', md: 'flex-start' }, mb: 2 }}>
-            <MenuBookIcon color="primary" sx={{ fontSize: 40, mr: 1 }} />
-            <Typography variant="h3" fontWeight="bold" color="primary">
-        Book<span style={{ color: '#f50057' }}>Mania</span>
+  return (
+    <>
+      <LibraryBackground />
+      <Box sx={{ minHeight: 'calc(100vh - 78px)', display: 'flex', alignItems: 'center' }}>
+        <Container
+          maxWidth="lg"
+          sx={{
+            py: { xs: 6, md: 10 },
+            display: 'grid',
+            gap: 4,
+            gridTemplateColumns: { xs: '1fr', md: '1.1fr 0.9fr' },
+            alignItems: 'center',
+          }}
+        >
+          <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
+            <Stack direction="row" spacing={1.5} justifyContent={{ xs: 'center', md: 'flex-start' }} alignItems="center" sx={{ mb: 2 }}>
+              <Box
+                sx={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: '16px',
+                  display: 'grid',
+                  placeItems: 'center',
+                  bgcolor: 'rgba(53, 103, 183, 0.10)',
+                }}
+              >
+                <MenuBookIcon color="primary" />
+              </Box>
+              <Typography variant="overline" sx={{ letterSpacing: '0.22em', color: 'text.secondary', fontWeight: 700 }}>
+                MODERN LIBRARY OPERATIONS
+              </Typography>
+            </Stack>
+
+            <Typography variant="h2" sx={{ mb: 2, fontSize: { xs: '2.6rem', md: '4.2rem' } }}>
+              A brighter way to manage your library.
             </Typography>
-        </Box>
-        <Typography variant="h6" sx={{ mb: 3 }}>
-            Explore and manage your library with ease. Students and admins, all in one place.
-        </Typography>
-        <Button variant="contained" size="large" onClick={() => navigate('/login')}>
-            Get Started
-        </Button>
-        </Box>
+            <Typography variant="h6" color="text.secondary" sx={{ maxWidth: 620, mb: 4, mx: { xs: 'auto', md: 0 } }}>
+              BookMania brings search, issue and return workflows, role-based dashboards, and notifications into one elegant system for students and admins.
+            </Typography>
 
-        {/* Animation Section */}
-        <Box sx={{ flex: 1, mt: { xs: 6, md: 0 }, maxWidth: 500 }}>
-        <Lottie animationData={homeAnimation} loop autoplay />
-        </Box>
-    </Container>
-    </Box>
-);
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent={{ xs: 'center', md: 'flex-start' }}>
+              <Button size="large" variant="contained" onClick={() => navigate('/login')}>
+                Open Portal
+              </Button>
+              <Button size="large" variant="outlined" onClick={() => navigate('/register')}>
+                Create Account
+              </Button>
+            </Stack>
+
+            <Box
+              sx={{
+                mt: 4,
+                display: 'grid',
+                gap: 2,
+                gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' },
+              }}
+            >
+              {features.map((feature) => (
+                <Paper key={feature.title} sx={{ p: 2.5, borderRadius: 4, bgcolor: 'rgba(255,255,255,0.82)' }}>
+                  <Box sx={{ mb: 1 }}>{feature.icon}</Box>
+                  <Typography variant="subtitle1" sx={{ mb: 0.5 }}>{feature.title}</Typography>
+                  <Typography variant="body2" color="text.secondary">{feature.text}</Typography>
+                </Paper>
+              ))}
+            </Box>
+          </Box>
+
+          <Paper
+            sx={{
+              p: { xs: 2, md: 3 },
+              borderRadius: 6,
+              bgcolor: 'rgba(255,255,255,0.78)',
+              overflow: 'hidden',
+            }}
+          >
+            <Lottie animationData={homeAnimation} loop autoplay />
+          </Paper>
+        </Container>
+      </Box>
+    </>
+  );
 };
 
 export default Home;

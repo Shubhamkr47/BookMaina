@@ -1,37 +1,42 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Button, Stack } from '@mui/material';
 
 const QRScanner = ({ onScanSuccess }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const scannerId = useMemo(() => `reader-${Math.random().toString(36).slice(2, 9)}`, []);
+
   useEffect(() => {
-    const scanner = new Html5QrcodeScanner('reader', {
+    if (!isOpen) return undefined;
+
+    const scanner = new Html5QrcodeScanner(scannerId, {
       fps: 10,
-      qrbox: 250,
+      qrbox: 220,
     });
 
     scanner.render(
       (decodedText) => {
         onScanSuccess(decodedText);
-        scanner.clear(); // Stop scanning after success
+        setIsOpen(false);
+        scanner.clear().catch(() => {});
       },
-      (error) => {
-        console.warn('QR scan error', error);
-      }
+      () => {}
     );
 
     return () => {
-      scanner.clear().catch((error) => {
-        console.error('QR clear error', error);
-      });
+      scanner.clear().catch(() => {});
     };
-  }, [onScanSuccess]);
+  }, [isOpen, onScanSuccess, scannerId]);
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>
-        📷 Scan Book QR Code
-      </Typography>
-      <div id="reader" style={{ width: '100%' }}></div>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems={{ xs: 'flex-start', sm: 'center' }} sx={{ mb: 1.5 }}>
+        <Typography variant="subtitle1">Scan Book QR Code</Typography>
+        <Button variant={isOpen ? 'outlined' : 'contained'} onClick={() => setIsOpen((prev) => !prev)}>
+          {isOpen ? 'Close Camera' : 'Open Camera'}
+        </Button>
+      </Stack>
+      {isOpen && <div id={scannerId} style={{ width: '100%' }}></div>}
     </Box>
   );
 };

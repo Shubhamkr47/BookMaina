@@ -18,22 +18,15 @@ import Home from './pages/Home';
 import './App.css';
 
 function AppLayout() {
-  // Optional: Hide Navbar on login/register pages
-  // const location = useLocation();
-  // const hideNavbar = ['/login', '/register'].includes(location.pathname);
-
   return (
-    <>
-      {/* {!hideNavbar && <Navbar />} */}
+    <div className="app-shell">
       <Navbar />
 
       <Routes>
-        {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Admin Routes */}
         <Route
           path="/admin/dashboard"
           element={
@@ -67,7 +60,6 @@ function AppLayout() {
           }
         />
 
-        {/* Student Routes */}
         <Route
           path="/student/dashboard"
           element={
@@ -85,10 +77,9 @@ function AppLayout() {
           }
         />
 
-        {/* 404 Fallback */}
-        <Route path="*" element={<div style={{ padding: 20 }}>404 - Page Not Found</div>} />
+        <Route path="*" element={<div className="page-container">404 - Page Not Found</div>} />
       </Routes>
-    </>
+    </div>
   );
 }
 
