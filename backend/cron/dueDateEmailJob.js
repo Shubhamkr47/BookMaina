@@ -1,10 +1,16 @@
 const cron = require('node-cron');
 const Issue = require('../models/Issue');
-const User = require('../models/User');
-const Book = require('../models/Book');
-const sendEmail = require('../utils/emailSender'); // Reusable email utility
+const sendEmail = require('../utils/emailSender');
 
-// Schedule the cron job to run daily at 9:00 AM
+const normalizeIssue = (issue) => {
+  const plain = issue.toObject ? issue.toObject() : issue;
+  return {
+    ...plain,
+    user: plain.user || plain.userId || null,
+    book: plain.book || plain.bookId || null,
+  };
+};
+
 cron.schedule('0 9 * * *', async () => {
   try {
     const tomorrow = new Date();
@@ -16,28 +22,31 @@ cron.schedule('0 9 * * *', async () => {
 
     const dueIssues = await Issue.find({
       dueDate: { $gte: tomorrow, $lt: dayAfter },
-      returned: false
-    }).populate('userId').populate('bookId');
+      returned: false,
+    }).populate('user', 'name email').populate('userId', 'name email').populate('book').populate('bookId');
 
-    for (const issue of dueIssues) {
-      const to = issue.userId.email;
-      const subject = `Reminder: Book "${issue.bookId.title}" is due tomorrow`;
-      const message = `
-        Hello ${issue.userId.name},
+    for (const rawIssue of dueIssues) {
+      const issue = normalizeIssue(rawIssue);
+      if (!issue.user?.email || !issue.book?.title) continue;
 
-        This is a reminder that your borrowed book "${issue.bookId.title}" is due on ${issue.dueDate.toDateString()}.
-
-        Please return it on time to avoid penalties.
-
-        Regards,
-        Library Management System
-      `;
-
-      await sendEmail(to, subject, message);
+      try {
+        await sendEmail({
+          to: issue.user.email,
+          subject: `Reminder: "${issue.book.title}" is due tomorrow`,
+          html: `
+            <h3>Book return reminder</h3>
+            <p>Hello ${issue.user.name},</p>
+            <p>Your borrowed book <strong>${issue.book.title}</strong> is due on <strong>${rawIssue.dueDate.toDateString()}</strong>.</p>
+            <p>Please return it on time to avoid penalties.</p>
+          `,
+        });
+      } catch (error) {
+        console.error(`Could not send reminder to ${issue.user.email}:`, error.message);
+      }
     }
 
-    console.log(`✅ Due date reminder emails sent: ${dueIssues.length}`);
+    console.log(`Due date reminder emails processed: ${dueIssues.length}`);
   } catch (error) {
-    console.error('❌ Error in due date reminder job:', error.message);
+    console.error('Error in due date reminder job:', error.message);
   }
 });

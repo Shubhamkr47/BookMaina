@@ -8,12 +8,14 @@ const Issue = require('../models/Issue');
 router.get('/stats', auth, async (req, res) => {
   try {
     const booksBorrowed = await Issue.countDocuments({
-      user: req.user.id
+      $or: [{ user: req.user.id }, { userId: req.user.id }]
     });
 
     const booksReturned = await Issue.countDocuments({
-      user: req.user.id,
-      returned: true
+      $and: [
+        { returned: true },
+        { $or: [{ user: req.user.id }, { userId: req.user.id }] }
+      ]
     });
 
     res.json({ booksBorrowed, booksReturned });
